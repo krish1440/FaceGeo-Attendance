@@ -6,3 +6,4 @@ Pillow==10.4.0
 Werkzeug==3.0.4
 flask-compress==1.15
 gunicorn 
+pytz
