@@ -124,6 +124,7 @@ def home():
 @app.route('/org_signup', methods=['GET', 'POST'])
 def org_signup():
     if request.method == 'POST':
+        logger.debug(f"Received form data: {request.form}")
         name = request.form.get('name')
         username = request.form.get('username')  # Email ID
         password = request.form.get('password')
