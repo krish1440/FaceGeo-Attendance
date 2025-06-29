@@ -1,0 +1,385 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <style>
+        /* Add User Form Styles */
+        .add-user-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .add-user-form {
+            background: rgba(40, 40, 60, 0.85);
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .add-user-form:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #e0e0e0;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #b0b0b0;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.85rem;
+            border: 1px solid #404060;
+            border-radius: 8px;
+            background: #2a2a3a;
+            color: #e0e0e0;
+            font-size: 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            border-color: #00aaff;
+            box-shadow: 0 0 10px rgba(0, 170, 255, 0.3);
+            outline: none;
+        }
+
+        /* File Input Styling */
+        .file-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        input[type="file"] {
+            opacity: 0;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            padding: 0.85rem 1.5rem;
+            background: linear-gradient(90deg, #404060, #303050);
+            color: #e0e0e0;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        .file-input-label:hover {
+            background: linear-gradient(90deg, #303050, #202040);
+            transform: translateY(-2px);
+        }
+
+        .file-name {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(90deg, #00aaff, #0088cc);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 170, 255, 0.4);
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(90deg, #0088cc, #0066aa);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 170, 255, 0.6);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(0, 170, 255, 0.3);
+        }
+
+        .error {
+            color: #ff5555;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .add-user-container {
+                max-width: 90%;
+                margin: 1.5rem auto;
+                padding: 0 1rem;
+            }
+
+            .add-user-form {
+                padding: 1.5rem;
+                border-radius: 10px;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+                margin-bottom: 1.2rem;
+            }
+
+            .form-group {
+                margin-bottom: 1rem;
+            }
+
+            label {
+                font-size: 0.9rem;
+            }
+
+            input, select, .submit-btn, .file-input-label {
+                font-size: 0.85rem;
+                padding: 0.7rem;
+            }
+
+            .file-input-wrapper {
+                gap: 0.8rem;
+            }
+
+            .file-name {
+                max-width: 120px;
+                font-size: 0.8rem;
+            }
+
+            .submit-btn {
+                padding: 0.8rem;
+                border-radius: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .add-user-container {
+                max-width: 95%;
+                margin: 1rem auto;
+                padding: 0 0.5rem;
+            }
+
+            .add-user-form {
+                padding: 1rem;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            h2 {
+                font-size: 1.2rem;
+                margin-bottom: 1rem;
+            }
+
+            .form-group {
+                margin-bottom: 0.8rem;
+            }
+
+            label {
+                font-size: 0.85rem;
+            }
+
+            input, select {
+                padding: 0.6rem;
+                font-size: 0.8rem;
+            }
+
+            .file-input-wrapper {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .file-input-label {
+                padding: 0.6rem 1rem;
+                width: 100%;
+                text-align: center;
+            }
+
+            .file-name {
+                max-width: 100%;
+                font-size: 0.75rem;
+            }
+
+            .submit-btn {
+                padding: 0.7rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            input, select, .submit-btn, .file-input-label {
+                font-size: 0.75rem;
+                padding: 0.5rem;
+            }
+
+            h2 {
+                font-size: 1.1rem;
+            }
+
+            .add-user-form {
+                padding: 0.8rem;
+            }
+        }
+
+        /* Ensure no interference with base.html navigation */
+        .add-user-container, .add-user-form {
+            z-index: 1; /* Ensure form stays below nav-menu (z-index: 1000 in base.html) */
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.querySelector('.add-user-form');
+            const fileInput = document.querySelector('#picture');
+            const fileNameSpan = document.querySelector('.file-name');
+
+            // Update file name display
+            fileInput.addEventListener('change', () => {
+                const file = fileInput.files[0];
+                if (file) {
+                    fileNameSpan.textContent = file.name;
+                    // Validate file type
+                    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+                    if (!allowedTypes.includes(file.type)) {
+                        showError('Only PNG, JPG, or JPEG files are allowed.');
+                        fileInput.value = '';
+                        fileNameSpan.textContent = 'No file chosen';
+                    }
+                } else {
+                    fileNameSpan.textContent = 'No file chosen';
+                }
+            });
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                // Validate file size (e.g., max 5MB)
+                const file = fileInput.files[0];
+                if (file && file.size > 5 * 1024 * 1024) {
+                    showError('File size must be less than 5MB.');
+                    return;
+                }
+
+                // Collect form data
+                const formData = new FormData(form);
+
+                try {
+                    const response = await fetch('/add_user', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        window.location.href = '/org_dashboard';
+                    } else {
+                        const errorText = await response.text();
+                        showError(errorText || 'Failed to add user. Please try again.');
+                    }
+                } catch (err) {
+                    showError('An error occurred. Please try again.');
+                    console.error('Add user error:', err);
+                }
+            });
+
+            // Ensure hamburger menu from base.html is not overridden
+            const hamburger = document.querySelector('.hamburger');
+            const navMenu = document.querySelector('.nav-menu');
+            if (hamburger && navMenu) {
+                hamburger.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    navMenu.classList.toggle('active');
+                    hamburger.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
+                });
+            }
+        });
+    </script>
+    <div class="add-user-container">
+        <form class="add-user-form" method="POST" action="/add_user" enctype="multipart/form-data">
+            <h2>Add User</h2>
+            {% if error %}
+                <div class="error">{{ error }}</div>
+            {% endif %}
+            <div class="form-group">
+                <label for="user_id">User ID</label>
+                <input type="text" id="user_id" name="user_id" required placeholder="Enter unique user ID">
+            </div>
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required placeholder="Enter full name">
+            </div>
+            <div class="form-group">
+                <label for="mobile">Mobile</label>
+                <input type="tel" id="mobile" name="mobile" required placeholder="Enter mobile number" pattern="[0-9]{10}">
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required placeholder="Enter email address">
+            </div>
+            <div class="form-group">
+                <label for="role">Role</label>
+                <select id="role" name="role" required>
+                    <option value="" disabled selected>Select role</option>
+                    <option value="Employee">Employee</option>
+                    <option value="Manager">Manager</option>
+                    <option value="Admin">Admin</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="department">Department</label>
+                <select id="department" name="department" required>
+                    <option value="" disabled selected>Select department</option>
+                    <option value="HR">HR</option>
+                    <option value="IT">IT</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Operations">Operations</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="picture">Profile Picture</label>
+                <div class="file-input-wrapper">
+                    <input type="file" id="picture" name="picture" accept=".png,.jpg,.jpeg">
+                    <span class="file-input-label">Choose File</span>
+                    <span class="file-name">No file chosen</span>
+                </div>
+            </div>
+            <button type="submit" class="submit-btn">Add User</button>
+        </form>
+    </div>
+{% endblock %}
