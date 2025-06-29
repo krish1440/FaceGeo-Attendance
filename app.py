@@ -34,7 +34,7 @@ load_dotenv()
 
 
 
-app = Flask(__name__, static_folder=None)  # Disable static file serving
+app = Flask(__name__)  # Disable static file serving
 app.config['SESSION_COOKIE_SECURE'] = True  # Only send cookies over HTTPS
 app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent JavaScript access to cookies
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Protect against CSRF
