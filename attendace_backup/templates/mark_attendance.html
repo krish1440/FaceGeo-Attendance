@@ -1,0 +1,520 @@
+{% extends 'base.html' %}
+{% block content %}
+    <style>
+        .mark-attendance-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            animation: fadeInUp 0.6s ease-out;
+            z-index: 1; /* Ensure below nav-menu (z-index: 2000) */
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .mark-attendance-form {
+            background: rgba(40, 40, 60, 0.85);
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .mark-attendance-form:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #e0e0e0;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #b0b0b0;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        #video, #canvas {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 2px solid #404060;
+        }
+
+        #canvas {
+            display: none;
+        }
+
+        .capture-btn, .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(90deg, #00aaff, #0088cc);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            min-height: 44px; /* Touch-friendly */
+            line-height: 1.2;
+        }
+
+        .capture-btn:hover, .submit-btn:hover:not(:disabled) {
+            background: linear-gradient(90deg, #0088cc, #0066aa);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 170, 255, 0.6);
+        }
+
+        .submit-btn:disabled, .capture-btn:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .capture-btn:active, .submit-btn:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(0, 170, 255, 0.3);
+        }
+
+        .error, .status {
+            color: #ff5555;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            animation: shake 0.3s ease;
+        }
+
+        .status {
+            color: #55ff55;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .mark-attendance-container {
+                max-width: 90%;
+                margin: 1.5rem auto;
+                padding: 0 1rem;
+            }
+
+            .mark-attendance-form {
+                padding: 1.5rem;
+                border-radius: 10px;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+                margin-bottom: 1.2rem;
+            }
+
+            #video, #canvas {
+                max-width: 100%;
+                height: auto;
+            }
+
+            .capture-btn, .submit-btn {
+                font-size: 0.9rem;
+                padding: 0.7rem;
+                min-height: 40px;
+            }
+
+            .error, .status {
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .mark-attendance-container {
+                max-width: 95%;
+                margin: 1rem auto;
+                padding: 0 0.5rem;
+            }
+
+            .mark-attendance-form {
+                padding: 1rem;
+            }
+
+            h2 {
+                font-size: 1.2rem;
+                margin-bottom: 1rem;
+            }
+
+            #video, #canvas {
+                max-width: 100%;
+                height: auto;
+            }
+
+            .capture-btn, .submit-btn {
+                font-size: 0.85rem;
+                padding: 0.6rem;
+                min-height: 36px;
+            }
+
+            .error, .status {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .mark-attendance-container {
+                max-width: 100%;
+                margin: 0.8rem auto;
+                padding: 0 0.4rem;
+            }
+
+            .mark-attendance-form {
+                padding: 0.8rem;
+            }
+
+            h2 {
+                font-size: 1.1rem;
+                margin-bottom: 0.8rem;
+            }
+
+            #video, #canvas {
+                max-width: 100%;
+                height: auto;
+            }
+
+            .capture-btn, .submit-btn {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+                min-height: 32px;
+            }
+
+            .error, .status {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+    <script src="{{ url_for('static', filename='face_api/face-api.min.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Hamburger menu toggle
+            const hamburger = document.querySelector('.hamburger');
+            const navMenu = document.querySelector('.nav-menu');
+            if (hamburger && navMenu) {
+                hamburger.removeEventListener('click', hamburger.clickHandler);
+                hamburger.clickHandler = (e) => {
+                    e.preventDefault();
+                    navMenu.classList.toggle('active');
+                    hamburger.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
+                    console.log('Mark Attendance: Hamburger clicked, nav-menu active:', navMenu.classList.contains('active'), 'Classes:', navMenu.className, 'Style:', window.getComputedStyle(navMenu).display);
+                };
+                hamburger.addEventListener('click', hamburger.clickHandler);
+
+                navMenu.querySelectorAll('a').forEach(link => {
+                    link.removeEventListener('click', link.clickHandler);
+                    link.clickHandler = () => {
+                        navMenu.classList.remove('active');
+                        hamburger.textContent = '☰';
+                        console.log('Mark Attendance: Link clicked, menu closed');
+                    };
+                    link.addEventListener('click', link.clickHandler);
+                });
+
+                document.removeEventListener('click', document.outsideClickHandler);
+                document.outsideClickHandler = (e) => {
+                    if (!navMenu.contains(e.target) && !hamburger.contains(e.target) && navMenu.classList.contains('active')) {
+                        navMenu.classList.remove('active');
+                        hamburger.textContent = '☰';
+                        console.log('Mark Attendance: Clicked outside, menu closed');
+                    };
+                };
+                document.addEventListener('click', document.outsideClickHandler);
+            } else {
+                console.error('Mark Attendance: Hamburger or nav-menu not found');
+            }
+
+            // Mark attendance functionality
+            const form = document.querySelector('.mark-attendance-form');
+            const video = document.querySelector('#video');
+            const canvas = document.querySelector('#canvas');
+            const captureBtn = document.querySelector('#capture-btn');
+            const submitBtn = document.querySelector('#submit-btn');
+            const selfieDataInput = document.querySelector('#selfie_data');
+            const latitudeInput = document.querySelector('#latitude');
+            const longitudeInput = document.querySelector('#longitude');
+            let stream;
+
+            submitBtn.disabled = true;
+
+            function showStatus(message) {
+                let statusDiv = document.querySelector('.status');
+                if (!statusDiv) {
+                    statusDiv = document.createElement('div');
+                    statusDiv.className = 'status';
+                    form.prepend(statusDiv);
+                }
+                statusDiv.textContent = message;
+                setTimeout(() => statusDiv.remove(), 5000); // Clear status after 5 seconds
+            }
+
+            function showError(message) {
+                let errorDiv = document.querySelector('.error');
+                if (!errorDiv) {
+                    errorDiv = document.createElement('div');
+                    errorDiv.className = 'error';
+                    form.prepend(errorDiv);
+                }
+                errorDiv.textContent = message;
+                setTimeout(() => errorDiv.remove(), 5000); // Clear error after 5 seconds
+            }
+
+            const modelPath = '{{ url_for('static', filename='face_api/models') }}/';
+            console.log('Model path:', modelPath);
+            try {
+                showStatus('Loading face recognition models...');
+                await Promise.all([
+                    faceapi.nets.tinyFaceDetector.loadFromUri(modelPath),
+                    faceapi.nets.faceLandmark68Net.loadFromUri(modelPath),
+                    faceapi.nets.faceRecognitionNet.loadFromUri(modelPath)
+                ]);
+                showStatus('Models loaded successfully');
+                console.log('Face-api.js models loaded');
+            } catch (err) {
+                showError('Failed to load models: ' + err.message);
+                console.error('Model loading error:', err);
+                return;
+            }
+
+            try {
+                showStatus('Starting webcam...');
+                stream = await navigator.mediaDevices.getUserMedia({ video: { width: 400, height: 300 } });
+                video.srcObject = stream;
+                await new Promise(resolve => video.onloadedmetadata = resolve);
+                showStatus('Webcam ready');
+                console.log('Webcam started');
+            } catch (err) {
+                showError('Failed to access webcam: ' + err.message);
+                console.error('Webcam error:', err);
+                return;
+            }
+
+            if (navigator.geolocation) {
+                showStatus('Getting precise location...');
+                const geoOptions = {
+                    enableHighAccuracy: true,
+                    timeout: 15000,
+                    maximumAge: 0
+                };
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const { latitude, longitude, accuracy } = position.coords;
+                        latitudeInput.value = latitude;
+                        longitudeInput.value = longitude;
+                        showStatus(`Location acquired (±${Math.round(accuracy)}m)`);
+                        console.log('Accurate location:', { latitude, longitude, accuracy });
+
+                        if (accuracy > 50) {
+                            showError(`Location is not accurate enough (±${Math.round(accuracy)}m). Try moving to an open area or enabling GPS.`);
+                        }
+                    },
+                    (error) => {
+                        console.warn('Initial location failed, retrying with watchPosition...');
+                        showStatus('Retrying with continuous tracking for better accuracy...');
+                        const watchId = navigator.geolocation.watchPosition(
+                            (position) => {
+                                const { latitude, longitude, accuracy } = position.coords;
+                                if (accuracy && accuracy < 50) {
+                                    latitudeInput.value = latitude;
+                                    longitudeInput.value = longitude;
+                                    showStatus(`Improved location acquired (±${Math.round(accuracy)}m)`);
+                                    console.log('Improved accurate location:', { latitude, longitude, accuracy });
+                                    navigator.geolocation.clearWatch(watchId);
+                                }
+                            },
+                            (err) => {
+                                showError('Failed to retrieve accurate location: ' + err.message);
+                                console.error('watchPosition error:', err);
+                            },
+                            geoOptions
+                        );
+                    },
+                    geoOptions
+                );
+            } else {
+                showError('Geolocation is not supported by your browser.');
+            }
+
+            let storedPictureUrl;
+            try {
+                showStatus('Fetching stored picture...');
+                const response = await fetch('/get_user_picture', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
+                });
+                const responseText = await response.text();
+                console.log('Picture response:', { status: response.status, data: responseText });
+                if (response.ok) {
+                    try {
+                        const data = JSON.parse(responseText);
+                        storedPictureUrl = data.picture_url;
+                        showStatus('Stored picture fetched');
+                        console.log('Picture URL:', storedPictureUrl);
+                    } catch (jsonErr) {
+                        showError('Invalid response format from server.');
+                        console.error('JSON parse error:', jsonErr, 'Response:', responseText);
+                        return;
+                    }
+                } else {
+                    showError(`Failed to fetch stored picture: ${responseText || response.statusText}`);
+                    console.error('Picture fetch error:', responseText);
+                }
+            } catch (err) {
+                showError('Error fetching stored picture: ' + err.message);
+                console.error('Picture fetch error:', err);
+            }
+
+            captureBtn.addEventListener('click', async () => {
+                captureBtn.disabled = true;
+                captureBtn.textContent = 'Capturing...';
+                try {
+                    showStatus('Capturing selfie...');
+                    const context = canvas.getContext('2d');
+                    canvas.width = video.videoWidth || 400;
+                    canvas.height = video.videoHeight || 300;
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    console.log('Canvas captured');
+
+                    showStatus('Detecting face in selfie...');
+                    const selfieDetections = await faceapi.detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions())
+                        .withFaceLandmarks()
+                        .withFaceDescriptor();
+                    if (!selfieDetections) {
+                        showError('No face detected in selfie. Ensure your face is centered and well-lit.');
+                        console.error('No face detected in selfie');
+                        return;
+                    }
+                    const selfieDescriptor = Array.from(selfieDetections.descriptor);
+                    console.log('Selfie descriptor:', selfieDescriptor);
+
+                    if (storedPictureUrl) {
+                        showStatus('Validating face...');
+                        const storedImg = new Image();
+                        storedImg.crossOrigin = 'anonymous';
+                        storedImg.src = storedPictureUrl + '?t=' + new Date().getTime();
+                        await new Promise((resolve, reject) => {
+                            storedImg.onload = resolve;
+                            storedImg.onerror = () => reject(new Error('Failed to load stored picture'));
+                        });
+
+                        const storedDetections = await faceapi.detectSingleFace(storedImg, new faceapi.TinyFaceDetectorOptions())
+                            .withFaceLandmarks()
+                            .withFaceDescriptor();
+                        if (!storedDetections) {
+                            showError('No face detected in stored picture.');
+                            console.error('No face in stored picture');
+                            return;
+                        }
+                        const storedDescriptor = Array.from(storedDetections.descriptor);
+                        const distance = faceapi.euclideanDistance(selfieDescriptor, storedDescriptor);
+                        console.log('Face distance:', distance);
+                        if (distance > 0.6) {
+                            showError('Face does not match organization records.');
+                            console.error('Face mismatch, distance:', distance);
+                            return;
+                        }
+
+                        selfieDataInput.value = canvas.toDataURL('image/jpeg', 0.8);
+                        submitBtn.disabled = false;
+                        showStatus('Face verified. Click Submit to mark attendance.');
+                        console.log('Face verified');
+                    } else {
+                        showError('No stored picture for validation. Please contact your organization.');
+                    }
+                } catch (err) {
+                    showError('Capture failed: ' + err.message);
+                    console.error('Capture error:', err);
+                } finally {
+                    captureBtn.disabled = false;
+                    captureBtn.textContent = 'Capture Selfie';
+                }
+            });
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!selfieDataInput.value) {
+                    showError('Capture a selfie first.');
+                    return;
+                }
+                if (!latitudeInput.value || !longitudeInput.value) {
+                    showError('Location required.');
+                    return;
+                }
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Submitting...';
+                showStatus('Submitting attendance...');
+                const formData = new FormData(form);
+                try {
+                    const response = await fetch('/mark_attendance', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
+                    const result = await response.json();
+                    if (response.ok) {
+                        window.location.href = '/user_dashboard';
+                    } else {
+                        showError(result.error); // Display the exact error from backend
+                        console.error('Server error:', result.error);
+                    }
+                } catch (err) {
+                    showError('Failed to connect to server: ' + err.message);
+                    console.error('Submission error:', err);
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit Attendance';
+                }
+            });
+
+            window.addEventListener('beforeunload', () => {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+            });
+        });
+    </script>
+    <div class="mark-attendance-container">
+        <form class="mark-attendance-form" method="POST" action="/mark_attendance" enctype="multipart/form-data">
+            <h2>Mark Attendance</h2>
+            <div class="form-group">
+                <label for="video">Live Webcam</label>
+                <video id="video" autoplay muted></video>
+                <canvas id="canvas"></canvas>
+            </div>
+            <div class="form-group">
+                <button type="button" id="capture-btn" class="capture-btn">Capture Selfie</button>
+            </div>
+            <div class="form-group">
+                <input type="hidden" id="selfie_data" name="selfie_data">
+                <input type="hidden" id="latitude" name="latitude">
+                <input type="hidden" id="longitude" name="longitude">
+            </div>
+            <button type="submit" id="submit-btn" class="submit-btn" disabled>Submit Attendance</button>
+        </form>
+    </div>
+{% endblock %}

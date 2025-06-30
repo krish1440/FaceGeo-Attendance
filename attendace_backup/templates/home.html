@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% block title %}Welcome to FaceGeo Attendance{% endblock %}
+{% block content %}
+    <style>
+        /* Home Page Specific Styles */
+        .hero {
+            text-align: center;
+            padding: 4rem 1rem;
+            animation: slideIn 0.8s ease-out;
+            z-index: 1; /* Ensure below nav-menu (z-index: 2000) */
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .welcome-message {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #e0e0e0;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            line-height: 1.2;
+        }
+
+        .welcome-message span {
+            color: #00aaff;
+            transition: color 0.3s ease;
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            color: #b0b0b0;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(90deg, #00aaff, #0088cc);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 170, 255, 0.4);
+            min-height: 44px; /* Touch-friendly */
+            line-height: 1.2;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 170, 255, 0.6);
+            background: linear-gradient(90deg, #0088cc, #0066aa);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(0, 170, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(90deg, #404060, #303050);
+            box-shadow: 0 4px 15px rgba(64, 64, 96, 0.4);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(90deg, #303050, #202040);
+            box-shadow: 0 6px 20px rgba(64, 64, 96, 0.6);
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 3rem 0.8rem;
+                margin-top: 4.5rem; /* Account for header height */
+            }
+
+            .welcome-message {
+                font-size: 1.8rem;
+                margin-bottom: 0.8rem;
+            }
+
+            .tagline {
+                font-size: 1rem;
+                max-width: 90%;
+                margin-bottom: 1.5rem;
+            }
+
+            .button-group {
+                gap: 0.8rem;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                padding: 0.8rem 1.5rem;
+                font-size: 0.9rem;
+                min-height: 44px;
+                width: 90%;
+                max-width: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero {
+                padding: 2rem 0.6rem;
+                margin-top: 4rem;
+            }
+
+            .welcome-message {
+                font-size: 1.5rem;
+                margin-bottom: 0.7rem;
+            }
+
+            .tagline {
+                font-size: 0.9rem;
+                max-width: 95%;
+                margin-bottom: 1.2rem;
+            }
+
+            .btn {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.85rem;
+                min-height: 40px;
+                width: 95%;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .hero {
+                padding: 1.5rem 0.5rem;
+                margin-top: 3.5rem;
+            }
+
+            .welcome-message {
+                font-size: 1.3rem;
+                margin-bottom: 0.6rem;
+            }
+
+            .tagline {
+                font-size: 0.8rem;
+                max-width: 100%;
+                margin-bottom: 1rem;
+            }
+
+            .btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.8rem;
+                min-height: 36px;
+                width: 100%;
+            }
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Hamburger menu toggle
+            const hamburger = document.querySelector('.hamburger');
+            const navMenu = document.querySelector('.nav-menu');
+            if (hamburger && navMenu) {
+                // Remove existing listeners to prevent duplicates
+                hamburger.removeEventListener('click', hamburger.clickHandler);
+                hamburger.clickHandler = (e) => {
+                    e.preventDefault();
+                    navMenu.classList.toggle('active');
+                    hamburger.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
+                    console.log('Home: Hamburger clicked, nav-menu active:', navMenu.classList.contains('active'), 'Classes:', navMenu.className, 'Style:', window.getComputedStyle(navMenu).display);
+                };
+                hamburger.addEventListener('click', hamburger.clickHandler);
+
+                // Close menu when a link is clicked
+                navMenu.querySelectorAll('a').forEach(link => {
+                    link.removeEventListener('click', link.clickHandler);
+                    link.clickHandler = () => {
+                        navMenu.classList.remove('active');
+                        hamburger.textContent = '☰';
+                        console.log('Home: Link clicked, menu closed');
+                    };
+                    link.addEventListener('click', link.clickHandler);
+                });
+
+                // Close menu when clicking outside
+                document.removeEventListener('click', document.outsideClickHandler);
+                document.outsideClickHandler = (e) => {
+                    if (!navMenu.contains(e.target) && !hamburger.contains(e.target) && navMenu.classList.contains('active')) {
+                        navMenu.classList.remove('active');
+                        hamburger.textContent = '☰';
+                        console.log('Home: Clicked outside, menu closed');
+                    }
+                };
+                document.addEventListener('click', document.outsideClickHandler);
+            } else {
+                console.error('Home: Hamburger or nav-menu not found');
+            }
+        });
+    </script>
+    <section class="hero">
+        <h1 class="welcome-message">Welcome to <span>FaceGeo Attendance</span></h1>
+        <p class="tagline">Streamline your organization’s attendance with secure face recognition and geofencing technology.</p>
+        <div class="button-group">
+            <a href="/org_login" class="btn">Organization Login</a>
+            <a href="/user_login" class="btn">User Login</a>
+            <a href="/org_signup" class="btn btn-secondary">Organization Signup</a>
+            <a href="/user_signup" class="btn btn-secondary">User Signup</a>
+        </div>
+    </section>
+{% endblock %}

@@ -1,0 +1,384 @@
+{% extends 'base.html' %}
+{% block content %}
+    <style>
+        /* User Dashboard Styles */
+        .dashboard-container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            animation: fadeInUp 0.6s ease-out;
+            z-index: 1; /* Ensure below nav-menu (z-index: 2000) */
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #e0e0e0;
+            text-align: center;
+            margin-bottom: 2rem;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .user-details-card {
+            background: rgba(40, 40, 60, 0.85);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .user-details-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 170, 255, 0.4);
+        }
+
+        .user-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .detail-item {
+            font-size: 0.95rem;
+            color: #b0b0b0;
+        }
+
+        .detail-item strong {
+            color: #e0e0e0;
+            font-weight: 600;
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem;
+        }
+
+        .option-card {
+            background: rgba(40, 40, 60, 0.85);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 170, 255, 0.4);
+        }
+
+        .option-card h3 {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #e0e0e0;
+            margin-bottom: 1rem;
+        }
+
+        .option-card button {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(90deg, #00aaff, #0088cc);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 170, 255, 0.4);
+            min-height: 44px; /* Touch-friendly */
+            line-height: 1.2;
+        }
+
+        .option-card button:hover {
+            background: linear-gradient(90deg, #0088cc, #0066aa);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 170, 255, 0.6);
+        }
+
+        .option-card button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(0, 170, 255, 0.3);
+        }
+
+        .logout button {
+            background: linear-gradient(90deg, #ff5555, #cc3333);
+            box-shadow: 0 4px 15px rgba(255, 85, 85, 0.4);
+        }
+
+        .logout button:hover {
+            background: linear-gradient(90deg, #cc3333, #aa2222);
+            box-shadow: 0 6px 20px rgba(255, 85, 85, 0.6);
+        }
+
+        .logout button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(255, 85, 85, 0.3);
+        }
+
+        .error {
+            color: #ff5555;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                max-width: 90%;
+                margin: 1.5rem auto;
+                padding: 0 1rem;
+            }
+
+            h2 {
+                font-size: 1.6rem;
+                margin-bottom: 1.2rem;
+            }
+
+            .user-details-card {
+                padding: 1.5rem;
+                border-radius: 10px;
+            }
+
+            .user-details {
+                grid-template-columns: 1fr;
+                gap: 0.8rem;
+            }
+
+            .detail-item {
+                font-size: 0.9rem;
+            }
+
+            .options-container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                padding: 0.8rem;
+            }
+
+            .option-card {
+                padding: 1.2rem;
+            }
+
+            .option-card h3 {
+                font-size: 1.1rem;
+                margin-bottom: 0.8rem;
+            }
+
+            .option-card button {
+                font-size: 0.9rem;
+                padding: 0.7rem;
+                min-height: 40px;
+            }
+
+            .error {
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dashboard-container {
+                max-width: 95%;
+                margin: 1rem auto;
+                padding: 0 0.5rem;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+                margin-bottom: 1rem;
+            }
+
+            .user-details-card {
+                padding: 1rem;
+            }
+
+            .detail-item {
+                font-size: 0.85rem;
+            }
+
+            .options-container {
+                gap: 0.8rem;
+                padding: 0.5rem;
+            }
+
+            .option-card {
+                padding: 1rem;
+            }
+
+            .option-card h3 {
+                font-size: 1rem;
+                margin-bottom: 0.7rem;
+            }
+
+            .option-card button {
+                font-size: 0.85rem;
+                padding: 0.6rem;
+                min-height: 36px;
+            }
+
+            .error {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .dashboard-container {
+                max-width: 100%;
+                margin: 0.8rem auto;
+                padding: 0 0.4rem;
+            }
+
+            h2 {
+                font-size: 1.2rem;
+                margin-bottom: 0.8rem;
+            }
+
+            .user-details-card {
+                padding: 0.8rem;
+            }
+
+            .detail-item {
+                font-size: 0.8rem;
+            }
+
+            .options-container {
+                gap: 0.6rem;
+                padding: 0.4rem;
+            }
+
+            .option-card {
+                padding: 0.8rem;
+            }
+
+            .option-card h3 {
+                font-size: 0.9rem;
+                margin-bottom: 0.6rem;
+            }
+
+            .option-card button {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+                min-height: 32px;
+            }
+
+            .error {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Hamburger menu toggle
+            const hamburger = document.querySelector('.hamburger');
+            const navMenu = document.querySelector('.nav-menu');
+            if (hamburger && navMenu) {
+                // Remove existing listeners to prevent duplicates
+                hamburger.removeEventListener('click', hamburger.clickHandler);
+                hamburger.clickHandler = (e) => {
+                    e.preventDefault();
+                    navMenu.classList.toggle('active');
+                    hamburger.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
+                    console.log('User Dashboard: Hamburger clicked, nav-menu active:', navMenu.classList.contains('active'), 'Classes:', navMenu.className, 'Style:', window.getComputedStyle(navMenu).display);
+                };
+                hamburger.addEventListener('click', hamburger.clickHandler);
+
+                // Close menu when a link is clicked
+                navMenu.querySelectorAll('a').forEach(link => {
+                    link.removeEventListener('click', link.clickHandler);
+                    link.clickHandler = () => {
+                        navMenu.classList.remove('active');
+                        hamburger.textContent = '☰';
+                        console.log('User Dashboard: Link clicked, menu closed');
+                    };
+                    link.addEventListener('click', link.clickHandler);
+                });
+
+                // Close menu when clicking outside
+                document.removeEventListener('click', document.outsideClickHandler);
+                document.outsideClickHandler = (e) => {
+                    if (!navMenu.contains(e.target) && !hamburger.contains(e.target) && navMenu.classList.contains('active')) {
+                        navMenu.classList.remove('active');
+                        hamburger.textContent = '☰';
+                        console.log('User Dashboard: Clicked outside, menu closed');
+                    }
+                };
+                document.addEventListener('click', document.outsideClickHandler);
+            } else {
+                console.error('User Dashboard: Hamburger or nav-menu not found');
+            }
+
+            // Handle navigation for option buttons
+            const buttons = document.querySelectorAll('.option-card button');
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const url = button.dataset.url;
+                    if (url) {
+                        window.location.href = url;
+                    }
+                });
+            });
+        });
+    </script>
+    <div class="dashboard-container">
+        <h2>User Dashboard</h2>
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+        <div class="user-details-card">
+            <h3>User Details</h3>
+            <div class="user-details">
+                <div class="detail-item">
+                    <strong>User ID:</strong> {{ user.user_id }}
+                </div>
+                <div class="detail-item">
+                    <strong>Name:</strong> {{ user.name }}
+                </div>
+                <div class="detail-item">
+                    <strong>Mobile:</strong> {{ user.mobile }}
+                </div>
+                <div class="detail-item">
+                    <strong>Email:</strong> {{ user.email }}
+                </div>
+                <div class="detail-item">
+                    <strong>Role:</strong> {{ user.role }}
+                </div>
+                <div class="detail-item">
+                    <strong>Department:</strong> {{ user.department }}
+                </div>
+            </div>
+        </div>
+        <div class="options-container">
+            <div class="option-card">
+                <h3>Mark Attendance</h3>
+                <button data-url="/mark_attendance">Mark Attendance</button>
+            </div>
+            <div class="option-card">
+                <h3>Request Manual Attendance</h3>
+                <button data-url="/manual_attendance">Request Manual</button>
+            </div>
+            <div class="option-card">
+                <h3>View Attendance</h3>
+                <button data-url="/view_attendance">View Attendance</button>
+            </div>
+            <div class="option-card logout">
+                <h3>Logout</h3>
+                <button data-url="/logout">Logout</button>
+            </div>
+        </div>
+    </div>
+{% endblock %}
