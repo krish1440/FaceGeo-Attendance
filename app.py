@@ -34,7 +34,7 @@ load_dotenv()
 
 
 
-app = Flask(__name__, static_folder=None)  # Disable static file serving
+app = Flask(__name__)  # Disable static file serving
 app.config['SESSION_COOKIE_SECURE'] = True  # Only send cookies over HTTPS
 app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent JavaScript access to cookies
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Protect against CSRF
@@ -124,6 +124,7 @@ def home():
 @app.route('/org_signup', methods=['GET', 'POST'])
 def org_signup():
     if request.method == 'POST':
+        logger.debug(f"Received form data: {request.form}")
         name = request.form.get('name')
         username = request.form.get('username')  # Email ID
         password = request.form.get('password')
@@ -336,8 +337,27 @@ def user_login():
 @app.route('/org_dashboard')
 def org_dashboard():
     if session.get('user_type') != 'organization':
+        logger.error(f"Unauthorized access to /org_dashboard by user_type={session.get('user_type')}")
         return redirect(url_for('org_login'))
-    return render_template('org_dashboard.html')
+    
+    org_id = session.get('org_id')
+    if not org_id:
+        logger.error("Missing org_id in session")
+        return render_template('org_dashboard.html', error='Invalid session. Please log in again.')
+    
+    try:
+        # Fetch organization details
+        org_data = supabase.table('organizations').select('id, name, username').eq('id', org_id).execute().data
+        if not org_data:
+            logger.error(f"No organization found for org_id={org_id}")
+            return render_template('org_dashboard.html', error='Organization not found.')
+        
+        org_details = org_data[0]  # Get the first (and only) record
+        logger.info(f"Organization dashboard loaded for org_id={org_id}, name={org_details['name']}")
+        return render_template('org_dashboard.html', org=org_details)
+    except Exception as e:
+        logger.error(f"Failed to load org_dashboard for org_id={org_id}: {str(e)}")
+        return render_template('org_dashboard.html', error=f"Failed to load organization data: {str(e)}")
 
 @app.route('/user_dashboard')
 def user_dashboard():
@@ -433,7 +453,7 @@ def add_user():
 @app.route('/edit_user', methods=['GET', 'POST'])
 def edit_user():
     if session.get('user_type') != 'organization':
-        return jsonify({'error': 'Unauthorized'}), 401
+        return render_template('unauthorized.html')
 
     if request.method == 'POST':
         action = request.form.get('action')
@@ -692,7 +712,7 @@ def manual_requests():
 def get_users():
     if session.get('user_type') != 'organization':
         logger.warning(f"Unauthorized access to /get_users by user_type={session.get('user_type')}")
-        return jsonify({'error': 'Unauthorized access. Please log in as an organization.'}), 401
+        return render_template('unauthorized.html')
     
     try:
         users = supabase.table('users').select('user_id, name').eq('org_id', session['org_id']).execute().data
@@ -806,7 +826,7 @@ def attendance_summary():
 def mark_absent_users():
     if session.get('user_type') != 'organization':
         logger.warning(f"Unauthorized access to /mark_absent_users by user_type={session.get('user_type')}")
-        return jsonify({'error': 'Unauthorized access. Please log in as an organization.'}), 401
+        return render_template('unauthorized.html')
     
     org_id = session.get('org_id')
     if not org_id:
@@ -910,7 +930,7 @@ def delete_org():
 def get_user_picture():
     if not session.get('user_type') == 'user':
         logger.error("Unauthorized access to /get_user_picture")
-        return jsonify({'error': 'Unauthorized'}), 401
+        return render_template('unauthorized.html')
     email = session.get('custom_user_id')
     org_id = session.get('org_id')
     if not email or not org_id:
@@ -935,7 +955,7 @@ def get_user_picture():
 def mark_attendance():
     if not session.get('user_type') == 'user':
         logger.error("Unauthorized access to /mark_attendance")
-        return jsonify({'error': 'Unauthorized access. Please log in as a user.'}), 401
+        return render_template('unauthorized.html')
     
     if request.method == 'GET':
         return render_template('mark_attendance.html')
@@ -1121,7 +1141,7 @@ def view_attendance():
 def download_user_attendance():
     if session.get('user_type') != 'organization':
         logger.warning(f"Unauthorized access to /download_user_attendance by user_type={session.get('user_type')}")
-        return Response("Unauthorized access. Please log in as an organization.", status=401, mimetype='text/plain')
+        return render_template('unauthorized.html')
     
     org_id = session.get('org_id')
     if not org_id:
@@ -1201,4 +1221,4 @@ def logout():
     return redirect(url_for('home'))
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
