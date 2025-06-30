@@ -1,0 +1,716 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <style>
+        /* Attendance Summary Form and Table Styles */
+        .summary-container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            animation: fadeInUp 0.6s ease-out;
+            z-index: 1; /* Ensure below nav-menu (z-index: 2000) */
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .summary-form, .absent-form {
+            background: rgba(40, 40, 60, 0.85);
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 2rem;
+            z-index: 1; /* Ensure below nav-menu */
+        }
+
+        .summary-form:hover, .absent-form:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #e0e0e0;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #b0b0b0;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.85rem;
+            border: 1px solid #404060;
+            border-radius: 8px;
+            background: #2a2a3a;
+            color: #e0e0e0;
+            font-size: 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            border-color: #00aaff;
+            box-shadow: 0 0 10px rgba(0, 170, 255, 0.3);
+            outline: none;
+        }
+
+        .submit-btn, .absent-btn, .user-download-btn {
+            width: 100%;
+            padding: 1rem;
+            margin: 1% 0;
+            background: linear-gradient(90deg, #00aaff, #0088cc);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 170, 255, 0.4);
+        }
+
+        .submit-btn:hover, .absent-btn:hover, .user-download-btn:hover {
+            background: linear-gradient(90deg, #0088cc, #0066aa);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 170, 255, 0.6);
+        }
+
+        .submit-btn:active, .absent-btn:active, .user-download-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(0, 170, 255, 0.3);
+        }
+
+        .summary-table, .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(40, 40, 60, 0.85);
+            border-radius: 12px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            z-index: 1; /* Ensure below nav-menu */
+            margin-bottom: 2rem;
+        }
+
+        .summary-table th, .summary-table td, .details-table th, .details-table td {
+            padding: 1rem;
+            text-align: left;
+            color: #e0e0e0;
+            font-size: 0.95rem;
+        }
+
+        .summary-table th, .details-table th {
+            background: linear-gradient(90deg, #404060, #303050);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .summary-table td, .details-table td {
+            border-bottom: 1px solid #404060;
+        }
+
+        .summary-table tr:last-child td, .details-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .summary-table tr:hover {
+            background: rgba(60, 60, 80, 0.5);
+            cursor: pointer;
+        }
+
+        .details-table {
+            display: none;
+        }
+
+        .details-table.active {
+            display: table;
+        }
+
+        .error, .success {
+            font-size: 0.9rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            animation: shake 0.3s ease;
+        }
+
+        .error {
+            color: #ff5555;
+        }
+
+        .success {
+            color: #55ff55;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .no-records {
+            text-align: center;
+            color: #b0b0b0;
+            font-size: 1rem;
+            padding: 2rem;
+        }
+
+        .absent-results {
+            background: rgba(40, 40, 60, 0.85);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+            color: #e0e0e0;
+            font-size: 0.95rem;
+        }
+
+        .absent-results ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .absent-results li {
+            padding: 0.5rem 0;
+        }
+
+        /* Mobile Responsive Styles for Tables */
+        @media (max-width: 768px) {
+            .summary-container {
+                max-width: 90%;
+                margin: 1.5rem auto;
+                padding: 0 1rem;
+            }
+
+            .summary-form, .absent-form {
+                padding: 1.5rem;
+                border-radius: 10px;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+                margin-bottom: 1.2rem;
+            }
+
+            .form-group {
+                margin-bottom: 1rem;
+            }
+
+            label {
+                font-size: 0.9rem;
+            }
+
+            input, select, .submit-btn, .absent-btn, .user-download-btn {
+                font-size: 0.85rem;
+                padding: 0.7rem;
+            }
+
+            .submit-btn, .absent-btn, .user-download-btn {
+                margin: 1% 0;
+            }
+
+            .summary-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            .summary-table th, .summary-table td {
+                padding: 0.75rem;
+                font-size: 0.85rem;
+                min-width: 120px;
+            }
+
+            /* Stacked layout for details-table on mobile */
+            .details-table.active {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .details-table thead {
+                display: none; /* Hide header on mobile for stacked layout */
+            }
+
+            .details-table tr {
+                display: block;
+                margin-bottom: 1rem;
+                border-bottom: 1px solid #404060;
+                padding: 0.5rem;
+            }
+
+            .details-table td {
+                display: block;
+                text-align: left;
+                font-size: 0.85rem;
+                padding: 0.5rem;
+                position: relative;
+                border: none;
+            }
+
+            .details-table td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #b0b0b0;
+                display: block;
+                margin-bottom: 0.25rem;
+            }
+
+            .details-table td:not(:last-child) {
+                border-bottom: 1px dotted #404060;
+            }
+
+            .absent-results {
+                padding: 1rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .summary-container {
+                max-width: 95%;
+                margin: 1rem auto;
+                padding: 0 0.5rem;
+            }
+
+            .summary-form, .absent-form {
+                padding: 1rem;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            h2 {
+                font-size: 1.2rem;
+                margin-bottom: 1rem;
+            }
+
+            .form-group {
+                margin-bottom: 0.8rem;
+            }
+
+            label {
+                font-size: 0.85rem;
+            }
+
+            input, select {
+                padding: 0.6rem;
+                font-size: 0.8rem;
+            }
+
+            .submit-btn, .absent-btn, .user-download-btn {
+                padding: 0.7rem;
+                font-size: 0.85rem;
+            }
+
+            .summary-table th, .summary-table td {
+                padding: 0.5rem;
+                font-size: 0.8rem;
+                min-width: 100px;
+            }
+
+            .details-table td {
+                font-size: 0.8rem;
+                padding: 0.4rem;
+            }
+
+            .no-records {
+                font-size: 0.9rem;
+                padding: 1.5rem;
+            }
+
+            .absent-results {
+                padding: 0.8rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .summary-container {
+                max-width: 100%;
+                margin: 0.8rem auto;
+            }
+
+            .summary-form, .absent-form {
+                padding: 0.8rem;
+            }
+
+            h2 {
+                font-size: 1.1rem;
+            }
+
+            input, select, .submit-btn, .absent-btn, .user-download-btn {
+                font-size: 0.75rem;
+                padding: 0.5rem;
+            }
+
+            .summary-table th, .summary-table td {
+                padding: 0.4rem;
+                font-size: 0.75rem;
+                min-width: 80px;
+            }
+
+            .details-table td {
+                font-size: 0.75rem;
+                padding: 0.3rem;
+            }
+
+            .no-records {
+                font-size: 0.8rem;
+                padding: 1rem;
+            }
+
+            .absent-results {
+                padding: 0.6rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hamburger menu toggle
+            const hamburger = document.querySelector('.hamburger');
+            const navMenu = document.querySelector('.nav-menu');
+            if (hamburger && navMenu) {
+                hamburger.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    navMenu.classList.toggle('active');
+                    hamburger.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
+                    console.log('Attendance Summary: Hamburger clicked, nav-menu active:', navMenu.classList.contains('active'));
+                });
+
+                navMenu.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        navMenu.classList.remove('active');
+                        hamburger.textContent = '☰';
+                        console.log('Attendance Summary: Link clicked, menu closed');
+                    });
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!navMenu.contains(e.target) && !hamburger.contains(e.target) && navMenu.classList.contains('active')) {
+                        navMenu.classList.remove('active');
+                        hamburger.textContent = '☰';
+                        console.log('Attendance Summary: Clicked outside, menu closed');
+                    }
+                });
+            } else {
+                console.error('Attendance Summary: Hamburger or nav-menu not found');
+            }
+
+            // Form and table functionality
+            const summaryForm = document.querySelector('.summary-form');
+            const absentForm = document.querySelector('.absent-form');
+            const summaryTableBody = document.querySelector('.summary-table tbody');
+            const detailsTable = document.querySelector('.details-table');
+            const detailsTableBody = document.querySelector('.details-table tbody');
+            const userIdInput = document.querySelector('#user-id');
+            const startDateInput = document.querySelector('#start-date');
+            const endDateInput = document.querySelector('#end-date');
+            const departmentInput = document.querySelector('#department');
+            const absentDateInput = document.querySelector('#absent-date');
+            const absentResultDiv = document.querySelector('#absent-result');
+
+            // Set default date for absent marking to today
+            const today = new Date().toISOString().split('T')[0];
+            absentDateInput.value = today;
+
+            // Show error or success message
+            function showMessage(message, isError = true) {
+                absentResultDiv.className = isError ? 'error' : 'success';
+                absentResultDiv.textContent = message;
+                absentResultDiv.style.display = 'block';
+                setTimeout(() => {
+                    absentResultDiv.style.display = 'none';
+                }, 5000);
+            }
+
+            // Show list of marked absent users
+            function showAbsentUsers(users) {
+                absentResultDiv.className = 'absent-results';
+                absentResultDiv.innerHTML = '<h3>Marked Absent Users:</h3><ul>' + 
+                    users.map(user => `<li>User ID: ${user.user_id}, Name: ${user.name}</li>`).join('') + 
+                    '</ul>';
+                absentResultDiv.style.display = 'block';
+            }
+
+            // Fetch users for user ID dropdown
+            async function fetchUsers() {
+                try {
+                    const response = await fetch('/get_users', {
+                        method: 'GET',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Failed to fetch users');
+                    }
+                    const users = await response.json();
+                    userIdInput.innerHTML = '<option value="">All Users</option>';
+                    users.forEach(user => {
+                        const option = document.createElement('option');
+                        option.value = user.user_id;
+                        option.textContent = `${user.user_id} (${user.name})`;
+                        userIdInput.appendChild(option);
+                    });
+                } catch (err) {
+                    showMessage('Something went wrong. Please try again later.');
+                    console.error('Fetch users error:', err);
+                    userIdInput.innerHTML = '<option value="">No users available</option>';
+                }
+            }
+
+            // Fetch filtered attendance records
+            async function fetchRecords() {
+                const formData = new FormData(summaryForm);
+                formData.append('action', 'fetch');
+                try {
+                    const response = await fetch('/attendance_summary', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Failed to fetch records');
+                    }
+                    const records = await response.json();
+                    console.log('Raw records:', records);
+                    renderRecords(records);
+                } catch (err) {
+                    showMessage('Something went wrong. Please try again later.');
+                    console.error('Fetch records error:', err);
+                    summaryTableBody.innerHTML = '<tr><td colspan="3" class="no-records">No records found.</td></tr>';
+                    detailsTable.classList.remove('active');
+                }
+            }
+
+            // Render records in the summary table
+            function renderRecords(records) {
+                summaryTableBody.innerHTML = '';
+                detailsTable.classList.remove('active');
+                document.querySelector('.user-download-container').style.display = 'none';
+                if (!records || records.length === 0) {
+                    summaryTableBody.innerHTML = '<tr><td colspan="3" class="no-records">No records found.</td></tr>';
+                    return;
+                }
+                records.forEach(record => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${record.user_id || 'N/A'}</td>
+                        <td>${record.name || 'Unknown'}</td>
+                        <td>${record.percentage}%</td>
+                    `;
+                    row.addEventListener('click', () => showDetails(record));
+                    summaryTableBody.appendChild(row);
+                });
+            }
+
+            // Show detailed records for a user
+            function showDetails(record) {
+                detailsTableBody.innerHTML = '';
+                const downloadButtonContainer = document.querySelector('.user-download-container');
+                if (!record.details || record.details.length === 0) {
+                    detailsTableBody.innerHTML = '<tr><td colspan="5" class="no-records">No detailed records found.</td></tr>';
+                    downloadButtonContainer.style.display = 'none';
+                } else {
+                    record.details.forEach(detail => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td data-label="User ID">${record.user_id || 'N/A'}</td>
+                            <td data-label="Name">${record.name || 'Unknown'}</td>
+                            <td data-label="Date">${detail.data || 'N/A'}</td>
+                            <td data-label="Status">${detail.status || 'N/A'}</td>
+                            <td data-label="Location">${detail.location || 'N/A'}</td>
+                        `;
+                        detailsTableBody.appendChild(row);
+                    });
+                    // Show and update download button
+                    const downloadButton = downloadButtonContainer.querySelector('.user-download-btn');
+                    downloadButton.dataset.userId = record.user_id;
+                    downloadButtonContainer.style.display = 'block';
+                }
+                detailsTable.classList.add('active');
+            }
+
+            // Handle summary form submission for table update
+            summaryForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                fetchRecords();
+            });
+
+            // Handle absent form submission
+            absentForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(absentForm);
+                try {
+                    const response = await fetch('/mark_absent_users', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const result = await response.json();
+                    if (!response.ok) {
+                        throw new Error(result.error || 'Failed to mark absent users');
+                    }
+                    if (result.marked_users && result.marked_users.length > 0) {
+                        showAbsentUsers(result.marked_users);
+                    } else {
+                        showMessage(result.message, false);
+                    }
+                    // Refresh records after marking absent
+                    fetchRecords();
+                } catch (err) {
+                    showMessage('Failed to mark absent users: ' + err.message);
+                    console.error('Mark absent users error:', err);
+                }
+            });
+
+            // Handle main CSV download
+            document.querySelector('.download-btn').addEventListener('click', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(summaryForm);
+                try {
+                    const response = await fetch('/attendance_summary', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Failed to download CSV');
+                    }
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'attendance_summary.csv';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                } catch (err) {
+                    showMessage('Something went wrong. Please try again later.');
+                    console.error('Download CSV error:', err);
+                }
+            });
+
+            // Handle user-specific CSV download
+            document.querySelector('.user-download-btn').addEventListener('click', async (e) => {
+                e.preventDefault();
+                const userId = e.target.dataset.userId;
+                const formData = new FormData();
+                formData.append('user_id', userId);
+                formData.append('start_date', startDateInput.value);
+                formData.append('end_date', endDateInput.value);
+                try {
+                    const response = await fetch('/download_user_attendance', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.text(); // Handle non-JSON error response
+                        throw new Error(errorData || 'Failed to download user CSV');
+                    }
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `user_attendance_${userId}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                } catch (err) {
+                    showMessage('Failed to download user CSV: ' + err.message);
+                    console.error('Download user CSV error:', err);
+                }
+            });
+
+            // Initial fetch for users and records
+            fetchUsers();
+            fetchRecords();
+        });
+    </script>
+    <div class="summary-container">
+        <h2>Attendance Summary</h2>
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+        <form class="summary-form" method="POST">
+            <div class="form-group">
+                <label for="user-id">User ID</label>
+                <select id="user-id" name="user_id">
+                    <option value="">All Users</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="start-date">Start Date</label>
+                <input type="date" id="start-date" name="start_date">
+            </div>
+            <div class="form-group">
+                <label for="end-date">End Date</label>
+                <input type="date" id="end-date" name="end_date">
+            </div>
+            <div class="form-group">
+                <label for="department">Department</label>
+                <select id="department" name="department">
+                    <option value="">All Departments</option>
+                    <option value="HR">HR</option>
+                    <option value="IT">IT</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Operations">Operations</option>
+                </select>
+            </div>
+            <button type="submit" class="submit-btn">Filter Records</button>
+            <button type="button" class="submit-btn download-btn">Download CSV</button>
+        </form>
+        <form class="absent-form" method="POST">
+            <h2>Mark Absent Users</h2>
+            <div class="form-group">
+                <label for="absent-date">Date (default: today)</label>
+                <input type="date" id="absent-date" name="date">
+            </div>
+            <button type="submit" class="absent-btn">Mark Absent Users for Selected Date</button>
+            <div id="absent-result" style="display: none;"></div>
+        </form>
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Name</th>
+                    <th>%</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="3" class="no-records">Loading records...</td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="details-table">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Name</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Location</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="5" class="no-records">Select a user to view details.</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="user-download-container" style="display: none;">
+            <button type="button" class="user-download-btn">Download User CSV</button>
+        </div>
+    </div>
+{% endblock %}

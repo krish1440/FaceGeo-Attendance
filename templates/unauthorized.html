@@ -1,0 +1,306 @@
+<<<<<<< HEAD
+{% extends 'base.html' %}
+
+{% block title %}Unauthorized - FaceGeo Attendance{% endblock %}
+
+{% block content %}
+<style>
+    /* Unauthorized Page Specific Styles */
+    .unauthorized-section {
+        text-align: center;
+        padding: 4rem 1rem;
+        animation: slideIn 0.8s ease-out;
+        z-index: 1; /* Ensure below nav-menu (z-index: 2000) */
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .unauthorized-message {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #e0e0e0;
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        line-height: 1.2;
+    }
+
+    .unauthorized-message span {
+        color: #ff5555; /* Red color for error emphasis */
+        transition: color 0.3s ease;
+    }
+
+    .error-message {
+        font-size: 1.2rem;
+        color: #b0b0b0;
+        margin-bottom: 2rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .home-button {
+        display: inline-block;
+        padding: 1rem 2rem;
+        background: linear-gradient(90deg, #00aaff, #0088cc);
+        color: #fff;
+        text-decoration: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 170, 255, 0.4);
+        min-height: 44px; /* Touch-friendly */
+        line-height: 1.2;
+        cursor: pointer;
+    }
+
+    .home-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0, 170, 255, 0.6);
+        background: linear-gradient(90deg, #0088cc, #0066aa);
+    }
+
+    .home-button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 10px rgba(0, 170, 255, 0.3);
+    }
+
+    /* Mobile Responsive Styles */
+    @media (max-width: 768px) {
+        .unauthorized-section {
+            padding: 3rem 0.8rem;
+            margin-top: 4.5rem; /* Account for header height */
+        }
+
+        .unauthorized-message {
+            font-size: 1.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .error-message {
+            font-size: 1rem;
+            max-width: 90%;
+            margin-bottom: 1.5rem;
+        }
+
+        .home-button {
+            padding: 0.8rem 1.5rem;
+            font-size: 0.9rem;
+            min-height: 44px;
+            width: 90%;
+            max-width: 300px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .unauthorized-section {
+            padding: 2rem 0.6rem;
+            margin-top: 4rem;
+        }
+
+        .unauthorized-message {
+            font-size: 1.5rem;
+            margin-bottom: 0.7rem;
+        }
+
+        .error-message {
+            font-size: 0.9rem;
+            max-width: 95%;
+            margin-bottom: 1.2rem;
+        }
+
+        .home-button {
+            padding: 0.7rem 1.2rem;
+            font-size: 0.85rem;
+            min-height: 40px;
+            width: 95%;
+        }
+    }
+
+    @media (max-width: 360px) {
+        .unauthorized-section {
+            padding: 1.5rem 0.5rem;
+            margin-top: 3.5rem;
+        }
+
+        .unauthorized-message {
+            font-size: 1.3rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .error-message {
+            font-size: 0.8rem;
+            max-width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .home-button {
+            padding: 0.6rem 1rem;
+            font-size: 0.8rem;
+            min-height: 36px;
+            width: 100%;
+        }
+    }
+</style>
+<section class="unauthorized-section">
+    <h1 class="unauthorized-message"><span>Unauthorized</span> Access</h1>
+    <p class="error-message">You do not have permission to access this page.</p>
+    <button class="home-button" onclick="window.location.href='/'">Return to Home</button>
+</section>
+=======
+{% extends 'base.html' %}
+
+{% block title %}Unauthorized - FaceGeo Attendance{% endblock %}
+
+{% block content %}
+<style>
+    /* Unauthorized Page Specific Styles */
+    .unauthorized-section {
+        text-align: center;
+        padding: 4rem 1rem;
+        animation: slideIn 0.8s ease-out;
+        z-index: 1; /* Ensure below nav-menu (z-index: 2000) */
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .unauthorized-message {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #e0e0e0;
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        line-height: 1.2;
+    }
+
+    .unauthorized-message span {
+        color: #ff5555; /* Red color for error emphasis */
+        transition: color 0.3s ease;
+    }
+
+    .error-message {
+        font-size: 1.2rem;
+        color: #b0b0b0;
+        margin-bottom: 2rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .home-button {
+        display: inline-block;
+        padding: 1rem 2rem;
+        background: linear-gradient(90deg, #00aaff, #0088cc);
+        color: #fff;
+        text-decoration: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 170, 255, 0.4);
+        min-height: 44px; /* Touch-friendly */
+        line-height: 1.2;
+        cursor: pointer;
+    }
+
+    .home-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0, 170, 255, 0.6);
+        background: linear-gradient(90deg, #0088cc, #0066aa);
+    }
+
+    .home-button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 10px rgba(0, 170, 255, 0.3);
+    }
+
+    /* Mobile Responsive Styles */
+    @media (max-width: 768px) {
+        .unauthorized-section {
+            padding: 3rem 0.8rem;
+            margin-top: 4.5rem; /* Account for header height */
+        }
+
+        .unauthorized-message {
+            font-size: 1.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .error-message {
+            font-size: 1rem;
+            max-width: 90%;
+            margin-bottom: 1.5rem;
+        }
+
+        .home-button {
+            padding: 0.8rem 1.5rem;
+            font-size: 0.9rem;
+            min-height: 44px;
+            width: 90%;
+            max-width: 300px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .unauthorized-section {
+            padding: 2rem 0.6rem;
+            margin-top: 4rem;
+        }
+
+        .unauthorized-message {
+            font-size: 1.5rem;
+            margin-bottom: 0.7rem;
+        }
+
+        .error-message {
+            font-size: 0.9rem;
+            max-width: 95%;
+            margin-bottom: 1.2rem;
+        }
+
+        .home-button {
+            padding: 0.7rem 1.2rem;
+            font-size: 0.85rem;
+            min-height: 40px;
+            width: 95%;
+        }
+    }
+
+    @media (max-width: 360px) {
+        .unauthorized-section {
+            padding: 1.5rem 0.5rem;
+            margin-top: 3.5rem;
+        }
+
+        .unauthorized-message {
+            font-size: 1.3rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .error-message {
+            font-size: 0.8rem;
+            max-width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .home-button {
+            padding: 0.6rem 1rem;
+            font-size: 0.8rem;
+            min-height: 36px;
+            width: 100%;
+        }
+    }
+</style>
+<section class="unauthorized-section">
+    <h1 class="unauthorized-message"><span>Unauthorized</span> Access</h1>
+    <p class="error-message">You do not have permission to access this page.</p>
+    <button class="home-button" onclick="window.location.href='/'">Return to Home</button>
+</section>
+>>>>>>> 68547844d456c9a9542c59c4e55805c6f3e7cbe0
+{% endblock %}
