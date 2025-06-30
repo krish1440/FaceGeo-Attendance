@@ -21,10 +21,9 @@ from io import BytesIO
 
 # Configure logging
 logging.basicConfig(
-    level=os.getenv('LOG_LEVEL', 'INFO'),  # Default to INFO in production
+    level=os.getenv('LOG_LEVEL', 'INFO'),  
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('app.log'),
         logging.StreamHandler()
     ]
 )
@@ -34,7 +33,7 @@ load_dotenv()
 
 
 
-app = Flask(__name__)  # Disable static file serving
+app = Flask(__name__)  
 app.config['SESSION_COOKIE_SECURE'] = True  # Only send cookies over HTTPS
 app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent JavaScript access to cookies
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Protect against CSRF
@@ -446,7 +445,7 @@ def add_user():
 @app.route('/edit_user', methods=['GET', 'POST'])
 def edit_user():
     if session.get('user_type') != 'organization':
-        return jsonify({'error': 'Unauthorized'}), 401
+        return render_template('unauthorized.html'), 403
 
     if request.method == 'POST':
         action = request.form.get('action')
@@ -705,7 +704,7 @@ def manual_requests():
 def get_users():
     if session.get('user_type') != 'organization':
         logger.warning(f"Unauthorized access to /get_users by user_type={session.get('user_type')}")
-        return jsonify({'error': 'Unauthorized access. Please log in as an organization.'}), 401
+        return render_template('unauthorized.html'), 401
     
     try:
         users = supabase.table('users').select('user_id, name').eq('org_id', session['org_id']).execute().data
@@ -819,7 +818,7 @@ def attendance_summary():
 def mark_absent_users():
     if session.get('user_type') != 'organization':
         logger.warning(f"Unauthorized access to /mark_absent_users by user_type={session.get('user_type')}")
-        return jsonify({'error': 'Unauthorized access. Please log in as an organization.'}), 401
+        return render_template('unauthorized.html'), 401
     
     org_id = session.get('org_id')
     if not org_id:
@@ -923,7 +922,7 @@ def delete_org():
 def get_user_picture():
     if not session.get('user_type') == 'user':
         logger.error("Unauthorized access to /get_user_picture")
-        return jsonify({'error': 'Unauthorized'}), 401
+        return render_template('unauthorized.html'), 401
     email = session.get('custom_user_id')
     org_id = session.get('org_id')
     if not email or not org_id:
@@ -948,7 +947,7 @@ def get_user_picture():
 def mark_attendance():
     if not session.get('user_type') == 'user':
         logger.error("Unauthorized access to /mark_attendance")
-        return jsonify({'error': 'Unauthorized access. Please log in as a user.'}), 401
+        return render_template('unauthorized.html'), 401
     
     if request.method == 'GET':
         return render_template('mark_attendance.html')
@@ -1134,7 +1133,7 @@ def view_attendance():
 def download_user_attendance():
     if session.get('user_type') != 'organization':
         logger.warning(f"Unauthorized access to /download_user_attendance by user_type={session.get('user_type')}")
-        return Response("Unauthorized access. Please log in as an organization.", status=401, mimetype='text/plain')
+        return render_template('unauthorized.html'), 401
     
     org_id = session.get('org_id')
     if not org_id:
@@ -1214,4 +1213,4 @@ def logout():
     return redirect(url_for('home'))
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
