@@ -197,3 +197,10 @@
 2025-06-30 20:51:10,732 - INFO -  * Restarting with watchdog (windowsapi)
 2025-06-30 20:51:11,796 - WARNING -  * Debugger is active!
 2025-06-30 20:51:11,799 - INFO -  * Debugger PIN: 122-367-903
+2025-06-30 20:54:22,577 - INFO - HTTP Request: GET https://ckcxowgccpdqgccscvgi.supabase.co/rest/v1/organizations?select=id%2C%20name%2C%20username&id=eq.cace2dd6-3f2c-4fff-8082-55b90f033cfa "HTTP/2 200 OK"
+2025-06-30 20:54:22,584 - INFO - Organization dashboard loaded for org_id=cace2dd6-3f2c-4fff-8082-55b90f033cfa, name=Krish 
+2025-06-30 20:54:22,605 - INFO - 127.0.0.1 - - [30/Jun/2025 20:54:22] "GET /org_dashboard HTTP/1.1" 200 -
+2025-06-30 20:59:28,572 - INFO -  * Detected change in 'e:\\Project\\attendace\\app.py', reloading
+2025-06-30 20:59:28,573 - INFO -  * Detected change in 'e:\\Project\\attendace\\app.py', reloading
+2025-06-30 20:59:28,573 - INFO -  * Detected change in 'e:\\Project\\attendace\\app.py', reloading
+2025-06-30 20:59:28,975 - INFO -  * Restarting with watchdog (windowsapi)

@@ -1221,4 +1221,8 @@ def logout():
     return redirect(url_for('home'))
 
 if __name__ == '__main__':
+<<<<<<< HEAD
     app.run(debug=True)
+=======
+    app.run()
+>>>>>>> 68547844d456c9a9542c59c4e55805c6f3e7cbe0
