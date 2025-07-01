@@ -131,7 +131,7 @@ def org_signup():
         # Validate input fields
         if not all([name, username, password, confirm_password]):
             logger.warning("Missing required fields in org_signup")
-            return render_template('org_signup.html', error='All fields are required')
+            return render_template('org_signup.html', error='All fields are required'), 400
         
         if password != confirm_password:
             logger.warning("Password mismatch in org_signup")
