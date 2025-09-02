@@ -107,7 +107,7 @@ Welcome to **FaceGeo**, a smart attendance management system that combines **fac
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-username/facegeo.git
+git clone https://github.com/krish1440/facegeo.git
 cd facegeo
 
 # Set up virtual environment
